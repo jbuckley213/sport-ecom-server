@@ -116,6 +116,17 @@ router.get('/previous-cart', async (req, res, next)=>{
     res.status(200).json(user.previousCart)
 })
 
+router.get('/product-details/:id', (req, res, next)=>{
+    const {id} = req.params
+
+    Product.findById(id).then((productFound)=>{
+        res.status(200).json(productFound)
+    }).catch(err =>{
+        next( createError(err) );
+    } )
+
+})
+
 
 
 

@@ -46,6 +46,14 @@ router.get("/", async (req, res) =>{
             }
         lineItems.push(shipping)
         console.log(lineItems)
+        
+
+const paymentIntent = await stripe.paymentIntents.create({
+    amount: 1099,
+    currency: 'eur',
+    payment_method_types: ['card'],
+    receipt_email: 'jbuckley213@gmail.com',
+  });
 
     stripe.checkout.sessions.create({
         payment_method_types: ['card'],
