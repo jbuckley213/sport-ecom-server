@@ -1,0 +1,35 @@
+{
+    "paths": [
+        {
+            "name": "/items",
+            "lambdaFunction": "sportsecomclientc34dd8f4",
+            "privacy": {
+                "open": true
+            },
+            "policyResourceName": "/items"
+        }
+    ],
+    "resourceName": "apic98afd4b",
+    "apiName": "apic98afd4b",
+    "functionArns": [
+        {
+            "lambdaFunction": "sportsecomclientc34dd8f4"
+        }
+    ],
+    "privacy": {
+        "auth": 0,
+        "unauth": 0,
+        "authRoleName": "amplify-amplify9488f8acb2e34-staging-152514-authRole",
+        "unAuthRoleName": "amplify-amplify9488f8acb2e34-staging-152514-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "sportsecomclientc34dd8f4",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}

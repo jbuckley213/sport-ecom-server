@@ -32,7 +32,8 @@ const app = express();
 app.use(
   cors({
     credentials: true,
-    origin: [process.env.PUBLIC_DOMAIN],
+    origin: [process.env.PUBLIC_DOMAIN,
+      "https://master.d39lct4hoge0j6.amplifyapp.com/"],
   }),
 );
 
@@ -65,6 +66,11 @@ app.use('/auth', authRouter);
 app.use('/product', productRouter)
  app.use('/payment', stripeRouter)
 
+
+
+ app.use((req, res) =>{
+   res.sendFile(__dirname + "/public/index.html")
+ })
 
 
 
