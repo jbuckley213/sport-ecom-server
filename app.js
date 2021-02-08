@@ -33,7 +33,8 @@ app.use(
   cors({
     credentials: true,
     origin: [process.env.PUBLIC_DOMAIN,
-      "https://master.d39lct4hoge0j6.amplifyapp.com/"],
+      "http://sports-hub.herokuapp.com",
+    "https://sports-hub.herokuapp.com"],
   }),
 );
 
