@@ -2,11 +2,46 @@ const express = require("express");
 const router = express.Router();
 const stripe = require("stripe")("sk_test_51IBgegFmgEKSMttvzeuVfo8svBnfICMyk6ipU9Lpdqa68mzOag2A6KRWZeDJO4hriDwlPsuM1eQJaBFq2g5HEIbG00da23PqIm")
 const createError = require("http-errors");
+const nodemailer = require("nodemailer");
+const {email} = require('../helpers/email-template')
 
 
-const uuid = require('uuid')
+
+const uuid = require('uuid');
+const { getMaxListeners } = require("../app");
 const User = require("../models/user.model")
 
+
+router.post("/details", (req, res, next)=>{
+    console.log("cool")
+    const {_id} = req.session.currentUser
+    const {name, building, city, street, postcode, country, email} = req.body
+
+    const address = {
+        building, city, street, postcode, country
+    }
+
+    User.findByIdAndUpdate(_id, {address:address,email:email, name:name}).then((userUpdated)=>{
+        res.status(200).json(userUpdated)
+    }).catch(err => {
+        next( createError(err) );
+
+    })
+
+})
+
+router.get("/review", (req, res, next) => {
+    const {_id} = req.session.currentUser
+    User.findById(_id).populate('cart.product')
+    .then((user)=>{
+        user.password = "*"
+        res.status(200).json(user)
+    }).catch(err => {
+        next( createError(err) );
+
+    })
+
+})
 
 
 router.get("/", async (req, res) =>{
@@ -23,7 +58,7 @@ router.get("/", async (req, res) =>{
                 console.log(cartItem)
                 const lineItem = {
                     price_data:{
-                        currency: 'usd',
+                        currency: 'eur',
                         product_data:{
                             name: cartItem.product.name
                         },
@@ -36,7 +71,7 @@ router.get("/", async (req, res) =>{
         },[])
     const shipping  = { 
                 price_data:{
-                    currency: 'usd',
+                    currency: 'eur',
                     product_data:{
                         name: "Shipping"
                     },
@@ -59,8 +94,9 @@ const paymentIntent = await stripe.paymentIntents.create({
         payment_method_types: ['card'],
         line_items: lineItems,
         mode: "payment",
-        success_url: `http://localhost:3000/private/?success=true`,
-        cancel_url: `http://localhost:3000/private/?canceled=true`,
+        success_url: `http://localhost:3000/success/?success=true`,
+        cancel_url: `http://localhost:3000/success/?canceled=true`,
+
        
     }).then((session)=>{
         res.json({ id: session.id })
@@ -72,50 +108,83 @@ router.post('/order/success', async (req, res) => {
     const session = await stripe.checkout.sessions.retrieve(req.query.session_id);
     const customer = await stripe.customers.retrieve(session.customer);
   
+    let testAccount = await nodemailer.createTestAccount();
+
+    // create reusable transporter object using the default SMTP transport
+    let transporter = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: testAccount.user, // generated ethereal user
+        pass: testAccount.pass, // generated ethereal password
+      },
+    });
+  
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+      from: '"Fred Foo 👻" <jbuckley213@gmail.com>', // sender address
+      to: "bar@example.com, jbuckley213@gmail.com", // list of receivers
+      subject: "Hello ✔", // Subject line
+      text: "Hello world?", // plain text body
+      html: "<b>Hello world?</b>", // html body
+    });
+  
+    console.log("Message sent: %s", info.messageId);
+    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+  
+    // Preview only available when sending through an Ethereal account
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+  
+  
+
+
     res.send(`<html><body><h1>Thanks for your order, ${customer.name}!</h1></body></html>`);
   });
 
 
-// stripe.checkout.sessions.create({
-//     payment_method_types: ['card'],
-//     line_items: [
-//         {
-//             price_data: {
-//                 currency: "usd",
-//                 product_data:{
-//                     name: "T-Shirt"
-//                 },
-//                 unit_amount: 2000,
-//             },
-//             quantity: 1,
-//         },
-//     ],
-//     mode: "payment",
-//     success_url: "https://localhost:3000/success",
-//     cancel_url: "https://localhost:3000/private"
-// }).then((session)=>{
-//     res.json({ id: session.id })
-// })
+router.get('/test', async (req,res, next)=>{
 
-// stripe.customers.create({
-//     email: token.email,
-//     source: token.id
-// }).then(customer => {
-//     stripe.charges.create({
-//         amount: product.price*100,
-//         currency: 'usd',
-//         customer: customer.id,
-//         receipt_email: token.email,
-//         description: `purchase of ${product.name}`,
-//         shipping: {
-//             name: token.card.name,
-//             address: {
-//                 country: token.card.address_country
-//             }
-//         }
-//     }, {idempontencyKey})
-// }).then(result => {
-//     res.status(200).json(result)
-// }).catch(err => console.log(err))
+    // let testAccount = await nodemailer.createTestAccount();
+
+    // create reusable transporter object using the default SMTP transport
+    var transport = nodemailer.createTransport({
+        host: "smtp.mailtrap.io",
+        port: 2525,
+        auth: {
+          user: "d3e96021f4dfcd",
+          pass: "f9cc1cfcf7810f"
+        }
+      });
+    
+    //  var transport = nodemailer.createTransport({
+    //     service:"gmail",
+
+    //     auth: {
+    //       user: "jbuckley213@gmail.com",
+    //       pass: "Blackrock321"
+    //     }
+    //   });
+  
+    // send mail with defined transport object
+    let info = await transport.sendMail({
+      from: '"Fred Foo 👻" <jbuckley213@gmail.com>', // sender address
+      to: "jbuckley213@gmail.com", // list of receivers
+      subject: "Thank You For Your Order ✔", // Subject line
+      text: "Hello world?", // plain text body
+      html: email("Joe"), // html body
+    });
+  
+    console.log("Message sent: %s", info.messageId);
+    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+  
+    // Preview only available when sending through an Ethereal account
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+  
+  res.json(200)
+
+})
 
 module.exports = router;

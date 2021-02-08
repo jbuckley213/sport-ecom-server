@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const createError = require("http-errors");
 
+const Cart = require("../models/cart.model")
 const Product = require("../models/product.model");
 const User = require("../models/user.model")
 const stripe = require("stripe")("sk_test_51IBgegFmgEKSMttvzeuVfo8svBnfICMyk6ipU9Lpdqa68mzOag2A6KRWZeDJO4hriDwlPsuM1eQJaBFq2g5HEIbG00da23PqIm")
@@ -102,15 +103,41 @@ router.delete('/cart/:id', async (req, res, next)=>{
 router.put('/change-cart', async (req, res, next)=>{
     const {_id} = req.session.currentUser
     const user = await User.findById(_id)
-    await User.findByIdAndUpdate(_id, {$push: {previousCart: {$each: [...user.cart]}}})
-    await User.findByIdAndUpdate(_id, {cart:[]})
+    // await User.findByIdAndUpdate(_id, {$push: {previousCart: {$each: [...user.cart]}}})
+   Cart.create({items:user.cart}).then((newCart)=>{
 
+      
+       const pr =  User.findByIdAndUpdate(_id, {$push: {previousCart:newCart}})
+       return pr;
+   }).then(()=>{
+    const pr = User.findByIdAndUpdate(_id, {cart:[]})
+    return pr;
+   }).then(()=>{
     res.json(200)
+
+   })
+   .catch(err =>{
+        next( createError(err) );
+
+   } )
+    
+
+   
 })
 
 router.get('/previous-cart', async (req, res, next)=>{
+
+    const populateQuery = {
+        path: 'previousCart',
+        model: 'Cart',
+        populate: [{
+            path: 'items.product',
+            model: 'Product'
+        }]
+    }
+
     const {_id} = req.session.currentUser
-    const user = await User.findById(_id).populate("previousCart.product")
+    const user = await User.findById(_id).populate(populateQuery)
     
 
     res.status(200).json(user.previousCart)

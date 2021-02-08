@@ -6,7 +6,7 @@ const Product = require("./product.model")
 const cartSchema = new Schema({
 
     items:[{product:{type: Schema.Types.ObjectId, ref:"Product"}, quantity:Number}],
-   
+    
 
 }, {
   timestamps: {
@@ -16,6 +16,6 @@ const cartSchema = new Schema({
 });
 
 
-const Cart = mongoose.model('User', userSchema);
+const Cart = mongoose.model('Cart', cartSchema);
 
 module.exports = Cart;
