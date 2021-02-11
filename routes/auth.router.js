@@ -114,6 +114,31 @@ router.get('/me', isLoggedIn, (req, res, next) => {
 })
 
 
+const { OAuth2Client } = require('google-auth-library')
+const client = new OAuth2Client(process.env.CLIENT_ID)
+router.post("/api/v1/auth/google", async (req, res, next) => {
+  console.log("google login")
+  console.log(req.body)
+    const { token }  = req.body
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.CLIENT_ID
+    });
+    const { name, email, picture } = ticket.getPayload();  
+
+    const foundUser = await User.findOne({ email })
+    if (foundUser) {
+      // If username is already taken, then return error response
+      req.session.currentUser = foundUser
+      res.status(201).json(foundUser)
+
+      // return next( createError(400) ); // Bad Request
+    }else{
+    const user = User.create({name, email, cart:[]})
+    req.session.currentUser = user
+    res.status(201).json(user)
+    }
+  })
 
 
 module.exports = router;

@@ -104,6 +104,7 @@ router.put('/change-cart', async (req, res, next)=>{
     const {_id} = req.session.currentUser
     const user = await User.findById(_id)
     // await User.findByIdAndUpdate(_id, {$push: {previousCart: {$each: [...user.cart]}}})
+    if(user.cart.length !== 0){
    Cart.create({items:user.cart}).then((newCart)=>{
 
       
@@ -120,7 +121,9 @@ router.put('/change-cart', async (req, res, next)=>{
         next( createError(err) );
 
    } )
-    
+}else{
+    res.json(200)
+}
 
    
 })

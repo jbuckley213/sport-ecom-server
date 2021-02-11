@@ -15,13 +15,13 @@ const User = require("../models/user.model")
 router.post("/details", (req, res, next)=>{
     console.log("cool")
     const {_id} = req.session.currentUser
-    const {name, building, city, street, postcode, country, email} = req.body
+    const {name, building, city, street, postcode, country} = req.body
 
     const address = {
         building, city, street, postcode, country
     }
 
-    User.findByIdAndUpdate(_id, {address:address,email:email, name:name}).then((userUpdated)=>{
+    User.findByIdAndUpdate(_id, {address:address, name:name}).then((userUpdated)=>{
         res.status(200).json(userUpdated)
     }).catch(err => {
         next( createError(err) );
@@ -45,6 +45,7 @@ router.get("/review", (req, res, next) => {
 
 
 router.get("/", async (req, res) =>{
+    let sessionHolder;
     const {product, token} = req.body
     console.log("routeCalled")
     // console.log("Product", product)
@@ -57,10 +58,13 @@ router.get("/", async (req, res) =>{
             .reduce((lineArray, cartItem)=>{
                 console.log(cartItem)
                 const lineItem = {
+
                     price_data:{
                         currency: 'eur',
                         product_data:{
-                            name: cartItem.product.name
+                            name: cartItem.product.name,
+                            // image: cartItem.product.image,
+
                         },
                         unit_amount: cartItem.product.price*100
                     },
@@ -91,17 +95,29 @@ const paymentIntent = await stripe.paymentIntents.create({
   });
 
     stripe.checkout.sessions.create({
+     billing_address_collection: "required",
         payment_method_types: ['card'],
         line_items: lineItems,
+        customer_email: user.email,
         mode: "payment",
-        // success_url: `http://localhost:3000/success/?success=true`,
-        // cancel_url: `http://localhost:3000/success/?canceled=true`,
-        success_url: "https://sports-hub.herokuapp.com/success/?success=true",
-        cancel_url: "https://sports-hub.herokuapp.com/success/?canceled=true"
+        success_url: `http://localhost:3000/success/?success=true`,
+        cancel_url: `http://localhost:3000/success/?canceled=true`,
+        // success_url: "https://sports-hub.herokuapp.com/success/?success=true",
+        // cancel_url: "https://sports-hub.herokuapp.com/success/?canceled=true"
 
        
     }).then((session)=>{
-        res.json({ id: session.id })
+        sessionHolder = session
+        console.log(session)
+        const paymentIntent =  stripe.paymentIntents.retrieve(
+            session.payment_intent
+          );
+   
+        return paymentIntent
+    }).then((response)=>{
+        console.log(response)
+        res.json({ id: sessionHolder.id })
+
     })
 
 })
@@ -147,46 +163,61 @@ router.post('/order/success', async (req, res) => {
 
 
 router.get('/test', async (req,res, next)=>{
-
+    const {_id} = req.session.currentUser
     // let testAccount = await nodemailer.createTestAccount();
+   User.findById(_id).then((user)=> {
 
-    // create reusable transporter object using the default SMTP transport
-    var transport = nodemailer.createTransport({
-        host: "smtp.mailtrap.io",
-        port: 2525,
-        auth: {
-          user: "d3e96021f4dfcd",
-          pass: "f9cc1cfcf7810f"
-        }
-      });
-    
-    //  var transport = nodemailer.createTransport({
-    //     service:"gmail",
+  // create reusable transporter object using the default SMTP transport
+  var transport = nodemailer.createTransport({
+    host: "smtp.mailtrap.io",
+    port: 2525,
+    auth: {
+      user: "d3e96021f4dfcd",
+      pass: "f9cc1cfcf7810f"
+    }
+  });
 
-    //     auth: {
-    //       user: "jbuckley213@gmail.com",
-    //       pass: ""
-    //     }
-    //   });
-  
-    // send mail with defined transport object
-    let info = await transport.sendMail({
-      from: '"Fred Foo 👻" <jbuckley213@gmail.com>', // sender address
-      to: "jbuckley213@gmail.com", // list of receivers
-      subject: "Thank You For Your Order ✔", // Subject line
-      text: "Hello world?", // plain text body
-      html: email("Joe"), // html body
-    });
-  
+//  var transport = nodemailer.createTransport({
+//     service:"gmail",
+
+//     auth: {
+//       user: "jbuckley213@gmail.com",
+//       pass: ""
+//     }
+//   });
+  console.log(user.name)
+// send mail with defined transport object
+transport.sendMail({
+  from: '"Fred Foo 👻" <jbuckley213@gmail.com>', // sender address
+  to: "jbuckley213@gmail.com", // list of receivers
+  subject: "Thank You For Your Order ✔", // Subject line
+  text: "Hello world?", // plain text body
+  html: email(user.name, user.address), // html body
+}).then((info)=>{
+
     console.log("Message sent: %s", info.messageId);
     // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-  
+    
     // Preview only available when sending through an Ethereal account
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
     // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-  
-  res.json(200)
+    
+    res.json(200)
+    
+    
 
 })
+
+
+
+   }).catch((err) => console(err))
+  
+
+})
+
+
+
+
+
 
 module.exports = router;
