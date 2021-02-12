@@ -173,7 +173,7 @@ router.get('/test', async (req,res, next)=>{
     port: 2525,
     auth: {
       user: "d3e96021f4dfcd",
-      pass: "f9cc1cfcf7810f"
+      pass: env.process.MAILTRAP_PASS
     }
   });
 

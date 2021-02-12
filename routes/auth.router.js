@@ -134,6 +134,7 @@ router.post("/api/v1/auth/google", async (req, res, next) => {
 
       // return next( createError(400) ); // Bad Request
     }else{
+      console.log(name)
     const user = User.create({name, email, cart:[]})
     req.session.currentUser = user
     res.status(201).json(user)
