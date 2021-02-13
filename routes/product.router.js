@@ -31,12 +31,16 @@ router.get('/', (req, res, next)=>{
 router.get('/cart/:id', async (req, res, next) => {
     const { id } = req.params
     const currentUser = req.session.currentUser
-
+    console.log(currentUser)
     const product = await Product.findById(id)
-
     const user  = await User.find({_id:currentUser._id, 'cart.product': id })
     if(user.length===0){
-        const updatedUser = await User.findByIdAndUpdate(currentUser._id, {$push: {cart:{product:product, quantity:1}}})
+        User.findByIdAndUpdate(currentUser._id, {$push: {cart:{product:product, quantity:1}}}).then((userUpdated)=>{
+            console.log(userUpdated)
+        }).catch((err) =>{
+            next( createError(err) );
+
+        } )
 
     }else{
         const quantity = user[0].cart.reduce((total,item) =>{

@@ -1,10 +1,13 @@
 require("dotenv").config();
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 const mongoose = require('mongoose');
 
 // //requiring the schema
 // const User = require('./../models/user.model');
 const Product = require('./../models/product.model');
+const User = require('./../models/user.model')
 // const saltRounds = 10;
 // const bcrypt = require('bcrypt');
 
@@ -14,6 +17,7 @@ const Product = require('./../models/product.model');
 // //requiring the 'fake' objects
 // const users = require('./user-mock-data');
  const products = require('./product.mock.data');
+ const user = require('./user.mock.data')
 
 
 // SEED SEQUENCE
@@ -42,11 +46,17 @@ mongoose
         // 2.  CREATE THE DOCUMENTS FROM ARRAY OF authors
         const pr = Product.create(products);
         return pr; // forwards the promise to next `then`
-    }) 
-    .then((createdProducts) => {
+    }).then((createdProducts)=>{
         console.log(`${createdProducts.length} products created`)
-        mongoose.connection.close();
 
+        const salt = bcrypt.genSaltSync(saltRounds);
+        const encryptedPassword = bcrypt.hashSync(user.password, salt);
+        const pr = User.create({name:user.name, email:user.email, isAdmin:user.isAdmin, password:encryptedPassword})
+        return pr
+    })
+    .then((createdUser) => {
+        console.log(`User created`)
+        mongoose.connection.close();
     })
 
     .catch((err) => console.log(err));
