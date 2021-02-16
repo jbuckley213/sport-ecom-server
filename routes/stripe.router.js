@@ -95,7 +95,6 @@ const paymentIntent = await stripe.paymentIntents.create({
   });
 
     stripe.checkout.sessions.create({
-     billing_address_collection: "required",
         payment_method_types: ['card'],
         line_items: lineItems,
         customer_email: user.email,
@@ -168,27 +167,27 @@ router.get('/test', async (req,res, next)=>{
    User.findById(_id).then((user)=> {
 
   // create reusable transporter object using the default SMTP transport
-  var transport = nodemailer.createTransport({
-    host: "smtp.mailtrap.io",
-    port: 2525,
-    auth: {
-      user: "d3e96021f4dfcd",
-      pass: env.process.MAILTRAP_PASS
-    }
-  });
-
-//  var transport = nodemailer.createTransport({
-//     service:"gmail",
-
+//   var transport = nodemailer.createTransport({
+//     host: "smtp.mailtrap.io",
+//     port: 2525,
 //     auth: {
-//       user: "jbuckley213@gmail.com",
-//       pass: ""
+//       user: "d3e96021f4dfcd",
+//       pass: env.process.MAILTRAP_PASS
 //     }
 //   });
+
+ var transport = nodemailer.createTransport({
+    service:"gmail",
+
+    auth: {
+      user: "sportshub213@gmail.com",
+      pass: process.env.EMAIL_PASSWORD
+    }
+  });
   console.log(user.name)
 // send mail with defined transport object
 transport.sendMail({
-  from: '"Fred Foo 👻" <jbuckley213@gmail.com>', // sender address
+  from: '"SportsHub" <sportshub213@gmail.com>', // sender address
   to: "jbuckley213@gmail.com", // list of receivers
   subject: "Thank You For Your Order ✔", // Subject line
   text: "Hello world?", // plain text body
