@@ -4,6 +4,7 @@ const stripe = require("stripe")("sk_test_51IBgegFmgEKSMttvzeuVfo8svBnfICMyk6ipU
 const createError = require("http-errors");
 const nodemailer = require("nodemailer");
 const {email} = require('../helpers/email-template')
+const Email = require("./../helpers/Email")
 
 
 
@@ -99,10 +100,10 @@ const paymentIntent = await stripe.paymentIntents.create({
         line_items: lineItems,
         customer_email: user.email,
         mode: "payment",
-        success_url: `http://localhost:3000/success/?success=true`,
-        cancel_url: `http://localhost:3000/success/?canceled=true`,
-        // success_url: "https://sports-hub.herokuapp.com/success/?success=true",
-        // cancel_url: "https://sports-hub.herokuapp.com/success/?canceled=true"
+        // success_url: `http://localhost:3000/success/?success=true`,
+        // cancel_url: `http://localhost:3000/success/?canceled=true`,
+        success_url: "https://sports-hub.herokuapp.com/success/?success=true",
+        cancel_url: "https://sports-hub.herokuapp.com/success/?canceled=true"
 
        
     }).then((session)=>{
@@ -161,18 +162,17 @@ router.post('/order/success', async (req, res) => {
   });
 
 
-router.get('/test', async (req,res, next)=>{
+router.get('/confirmation-email', async (req,res, next)=>{
     const {_id} = req.session.currentUser
     // let testAccount = await nodemailer.createTestAccount();
-   User.findById(_id).then((user)=> {
+   User.findById(_id).populate('previousCart').then((user)=> {
 
-  // create reusable transporter object using the default SMTP transport
 //   var transport = nodemailer.createTransport({
 //     host: "smtp.mailtrap.io",
 //     port: 2525,
 //     auth: {
 //       user: "d3e96021f4dfcd",
-//       pass: env.process.MAILTRAP_PASS
+//       pass: process.env.MAILTRAP_PASS
 //     }
 //   });
 
@@ -185,6 +185,9 @@ router.get('/test', async (req,res, next)=>{
     }
   });
   console.log(user.name)
+  const lastCartItem = user.previousCart.length
+  console.log(user.previousCart)
+  console.log(user.previousCart[lastCartItem])
 // send mail with defined transport object
 transport.sendMail({
   from: '"SportsHub" <sportshub213@gmail.com>', // sender address
@@ -209,7 +212,7 @@ transport.sendMail({
 
 
 
-   }).catch((err) => console(err))
+   }).catch((err) => console.log(err))
   
 
 })

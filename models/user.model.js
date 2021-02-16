@@ -9,7 +9,7 @@ const userSchema = new Schema({
   // cart:[{type: Schema.Types.ObjectId, ref:"Product"}]
    cart:[{product:{type: Schema.Types.ObjectId, ref:"Product"}, quantity:Number}],
   //  previousCart: [{product:{type: Schema.Types.ObjectId, ref:"Product"}, quantity:Number}],
-  previousCart: [{type:Schema.Types.ObjectId, ref:"Product"}],
+  previousCart: [{type:Schema.Types.ObjectId, ref:"Cart"}],
   isAdmin: { type: Boolean, default: false},
    email: String,
    address: {

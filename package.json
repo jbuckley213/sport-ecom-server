@@ -15,6 +15,7 @@
     "debug": "~2.6.9",
     "dotenv": "^8.0.0",
     "express": "~4.16.1",
+    "express-react-views": "^0.11.0",
     "express-session": "^1.16.1",
     "faker": "^5.1.0",
     "google-auth-library": "^7.0.2",
@@ -23,6 +24,7 @@
     "morgan": "~1.9.1",
     "node-gyp": "^4.0.0",
     "nodemailer": "^6.4.17",
+    "react": "^17.0.1",
     "stripe": "^8.131.1",
     "uuid": "^8.3.2"
   },

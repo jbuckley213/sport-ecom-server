@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const cors = require('cors');
+
 require('dotenv').config();
 
 const authRouter = require('./routes/auth.router');
@@ -27,6 +28,8 @@ mongoose
 
 // EXPRESS SERVER INSTANCE
 const app = express();
+
+
 
 // CORS MIDDLEWARE SETUP
 app.use(
