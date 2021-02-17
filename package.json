@@ -19,6 +19,7 @@
     "express-session": "^1.16.1",
     "faker": "^5.1.0",
     "google-auth-library": "^7.0.2",
+    "googleapis": "^67.0.0",
     "grandjs": "^2.2.25",
     "http-errors": "^1.7.2",
     "mongoose": "^5.7.5",

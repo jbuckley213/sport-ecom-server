@@ -4,7 +4,8 @@ const stripe = require("stripe")("sk_test_51IBgegFmgEKSMttvzeuVfo8svBnfICMyk6ipU
 const createError = require("http-errors");
 const nodemailer = require("nodemailer");
 const {email} = require('../helpers/email-template')
-
+const { google } = require("googleapis");
+const OAuth2 = google.auth.OAuth2;
 
 
 const uuid = require('uuid');
@@ -164,6 +165,16 @@ router.post('/order/success', async (req, res) => {
 
 
 router.post('/confirmation-email', async (req,res, next)=>{
+   
+    const oauth2Client = new OAuth2(
+        process.env.CLIENT_ID_MAIL, // ClientID
+        process.env.CLIENT_SECRET, // Client Secret
+        "https://developers.google.com/oauthplayground" // Redirect URL
+   );
+   oauth2Client.setCredentials({
+    refresh_token: process.env.REFRESH_TOKEN
+});
+const accessToken = oauth2Client.getAccessToken()  
     const {_id} = req.session.currentUser
     const {messageHTML} = req.body
     const populateQuery = {
@@ -198,7 +209,7 @@ router.post('/confirmation-email', async (req,res, next)=>{
       clientId: process.env.CLIENT_ID_MAIL,
       clientSecret: process.env.CLIENT_SECRET,
       refreshToken: process.env.REFRESH_TOKEN,
-      accessToken: process.env.ACCESS_TOKEN,
+      accessToken: accessToken,
     }
   })
 
