@@ -166,14 +166,14 @@ router.post('/order/success', async (req, res) => {
 
 router.post('/confirmation-email', async (req,res, next)=>{
    
-    const oauth2Client = new OAuth2(
-        process.env.CLIENT_ID_MAIL, // ClientID
-        process.env.CLIENT_SECRET, // Client Secret
-        "https://developers.google.com/oauthplayground" // Redirect URL
-   );
-   oauth2Client.setCredentials({
-    refresh_token: process.env.REFRESH_TOKEN
-});
+//     const oauth2Client = new OAuth2(
+//         process.env.CLIENT_ID_MAIL, // ClientID
+//         process.env.CLIENT_SECRET, // Client Secret
+//         "https://developers.google.com/oauthplayground" // Redirect URL
+//    );
+//    oauth2Client.setCredentials({
+//     refresh_token: process.env.REFRESH_TOKEN
+// });
 const accessToken = oauth2Client.getAccessToken()  
     const {_id} = req.session.currentUser
     const {messageHTML} = req.body
