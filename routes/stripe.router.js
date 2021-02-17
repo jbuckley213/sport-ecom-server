@@ -99,12 +99,12 @@ const paymentIntent = await stripe.paymentIntents.create({
         line_items: lineItems,
         customer_email: user.email,
         mode: "payment",
-        success_url: `http://localhost:3000/success/?success=true`,
+        // success_url: `http://localhost:3000/success/?success=true`,
         // // cancel_url: `http://localhost:3000/success/?canceled=true`,
-        cancel_url: `http://localhost:3000/review`,
+        // cancel_url: `http://localhost:3000/review`,
 
-        // success_url: "https://sports-hub.herokuapp.com/success/?success=true",
-        // cancel_url: "https://sports-hub.herokuapp.com/review"
+        success_url: "https://sports-hub.herokuapp.com/success/?success=true",
+        cancel_url: "https://sports-hub.herokuapp.com/review"
 
        
     }).then((session)=>{
