@@ -188,16 +188,19 @@ router.post('/confirmation-email', async (req,res, next)=>{
 
  var transport = nodemailer.createTransport({
     service:"gmail",
-
+    port: 465,
+    secure: true, // use SSL
     auth: {
+ 
+        type: 'OAuth2',
       user: "sportshub213@gmail.com",
-      pass: process.env.EMAIL_PASSWORD,
-      clientId: process.env.CLIENT_ID,
+       pass: process.env.EMAIL_PASSWORD,
+      clientId: process.env.CLIENT_ID_MAIL,
       clientSecret: process.env.CLIENT_SECRET,
       refreshToken: process.env.REFRESH_TOKEN,
       accessToken: process.env.ACCESS_TOKEN,
     }
-  });
+  })
 
   console.log("confirmation email called")
 
@@ -222,7 +225,7 @@ html:messageHTML,
     
     
 
-})
+}).catch((err)=>console.log(err))
 
 
 
