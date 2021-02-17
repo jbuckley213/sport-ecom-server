@@ -166,15 +166,15 @@ router.post('/order/success', async (req, res) => {
 
 router.post('/confirmation-email', async (req,res, next)=>{
    
-//     const oauth2Client = new OAuth2(
-//         process.env.CLIENT_ID_MAIL, // ClientID
-//         process.env.CLIENT_SECRET, // Client Secret
-//         "http://developers.google.com/oauthplayground" // Redirect URL
-//    );
-//    oauth2Client.setCredentials({
-//     refresh_token: process.env.REFRESH_TOKEN
-// });
-// const accessToken = oauth2Client.getAccessToken()  
+    const oauth2Client = new OAuth2(
+        process.env.CLIENT_ID_MAIL, // ClientID
+        process.env.CLIENT_SECRET, // Client Secret
+        "https://developers.google.com/oauthplayground" // Redirect URL
+   );
+   oauth2Client.setCredentials({
+    refresh_token: process.env.REFRESH_TOKEN
+});
+const accessToken = oauth2Client.getAccessToken()  
     const {_id} = req.session.currentUser
     const {messageHTML} = req.body
     const populateQuery = {
@@ -198,8 +198,8 @@ router.post('/confirmation-email', async (req,res, next)=>{
 //   });
 
  var transport = nodemailer.createTransport({
-    // service:"gmail",
-    host: 'smtp.gmail.com',
+    service:"gmail",
+    // host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: {
@@ -211,7 +211,12 @@ router.post('/confirmation-email', async (req,res, next)=>{
       clientSecret: process.env.CLIENT_SECRET,
       refreshToken: process.env.REFRESH_TOKEN,
       accessToken: process.env.ACCESS_TOKEN,
-    }
+    // accessToken: accessToken,
+
+    },
+    tls: {
+        rejectUnauthorized: false
+      }
   })
 
   console.log("confirmation email called")
