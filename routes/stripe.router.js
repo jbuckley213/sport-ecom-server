@@ -166,6 +166,7 @@ router.post('/order/success', async (req, res) => {
 router.post('/confirmation-email', async (req,res, next)=>{
     const {_id} = req.session.currentUser
     const {messageHTML} = req.body
+    console.log("confirmation email called")
     const populateQuery = {
         path: 'previousCart',
         model: 'Cart',
