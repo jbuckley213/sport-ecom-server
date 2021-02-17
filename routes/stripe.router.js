@@ -4,7 +4,6 @@ const stripe = require("stripe")("sk_test_51IBgegFmgEKSMttvzeuVfo8svBnfICMyk6ipU
 const createError = require("http-errors");
 const nodemailer = require("nodemailer");
 const {email} = require('../helpers/email-template')
-const Email = require("./../helpers/Email")
 
 
 
@@ -14,13 +13,13 @@ const User = require("../models/user.model")
 
 
 router.post("/details", (req, res, next)=>{
-    console.log("cool")
     const {_id} = req.session.currentUser
     const {name, building, city, street, postcode, country} = req.body
 
     const address = {
         building, city, street, postcode, country
     }
+    console.log(address)
 
     User.findByIdAndUpdate(_id, {address:address, name:name}).then((userUpdated)=>{
         res.status(200).json(userUpdated)
@@ -100,10 +99,12 @@ const paymentIntent = await stripe.paymentIntents.create({
         line_items: lineItems,
         customer_email: user.email,
         mode: "payment",
-        // success_url: `http://localhost:3000/success/?success=true`,
-        // cancel_url: `http://localhost:3000/success/?canceled=true`,
-        success_url: "https://sports-hub.herokuapp.com/success/?success=true",
-        cancel_url: "https://sports-hub.herokuapp.com/success/?canceled=true"
+        success_url: `http://localhost:3000/success/?success=true`,
+        // // cancel_url: `http://localhost:3000/success/?canceled=true`,
+        cancel_url: `http://localhost:3000/review`,
+
+        // success_url: "https://sports-hub.herokuapp.com/success/?success=true",
+        // cancel_url: "https://sports-hub.herokuapp.com/review"
 
        
     }).then((session)=>{
@@ -162,10 +163,19 @@ router.post('/order/success', async (req, res) => {
   });
 
 
-router.get('/confirmation-email', async (req,res, next)=>{
+router.post('/confirmation-email', async (req,res, next)=>{
     const {_id} = req.session.currentUser
+    const {messageHTML} = req.body
+    const populateQuery = {
+        path: 'previousCart',
+        model: 'Cart',
+        populate: [{
+            path: 'items.product',
+            model: 'Product'
+        }]
+    }
     // let testAccount = await nodemailer.createTestAccount();
-   User.findById(_id).populate('previousCart').then((user)=> {
+   User.findById(_id).populate(populateQuery).then((user)=> {
 
 //   var transport = nodemailer.createTransport({
 //     host: "smtp.mailtrap.io",
@@ -184,17 +194,16 @@ router.get('/confirmation-email', async (req,res, next)=>{
       pass: process.env.EMAIL_PASSWORD
     }
   });
-  console.log(user.name)
-  const lastCartItem = user.previousCart.length
-  console.log(user.previousCart)
-  console.log(user.previousCart[lastCartItem])
-// send mail with defined transport object
+
+
+
 transport.sendMail({
   from: '"SportsHub" <sportshub213@gmail.com>', // sender address
-  to: "jbuckley213@gmail.com", // list of receivers
+  to: user.email, // list of receivers
   subject: "Thank You For Your Order ✔", // Subject line
-  text: "Hello world?", // plain text body
-  html: email(user.name, user.address), // html body
+//   text: "Hello world?", // plain text body
+//   html: email(user.name, user.address), // html body
+html:messageHTML,
 }).then((info)=>{
 
     console.log("Message sent: %s", info.messageId);

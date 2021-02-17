@@ -1,11 +1,14 @@
-exports.email = (name, address) =>{ 
-    
+exports.email = (name, address, cart) =>{ 
+   
+ 
+
     return `
     <html>
     <head>
     <style type="text/css">
     .title{
         color:white;
+        text-align:center;
 
     }
     body{
@@ -20,6 +23,7 @@ exports.email = (name, address) =>{
         box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
         margin: 0 auto;
         text-align:center;
+        
 }
 
 .address h5{
@@ -28,7 +32,7 @@ exports.email = (name, address) =>{
 }
 
     .header-img{
-        border-radius:20px;
+        border-radius: 0 0 40% 40%;
         width:100%;
         height:150px;
         object-fit:contain;
@@ -36,6 +40,9 @@ exports.email = (name, address) =>{
         background-size: cover;
         color:white;
         padding:10px;
+    }
+  p{
+        text-align:center;
     }
     .info{
         padding:10px 15px;
